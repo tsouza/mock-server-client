@@ -56,6 +56,21 @@ func (c MockServerClient) Verify(matcher RequestMatcher, times Times) error {
 	return errors.Wrap(errors.New(buf.String()), "verification failed")
 }
 
+// Reset erases from the mock server all the requests.
+func (c MockServerClient) Reset() error {
+	resp, err := c.restyClient.NewRequest().
+		Put("mockserver/reset?type=LOG")
+
+	if err != nil {
+		return errors.Wrap(err, "error calling clear endpoint (type=LOGS)")
+	}
+
+	if resp.StatusCode() != http.StatusOK {
+		return errors.Wrap(errors.New("status was expected to be 200"), "log clearing failed")
+	}
+	return nil
+}
+
 // Clear erases from the mock server all the requests matching the matcher.
 func (c MockServerClient) Clear(matcher RequestMatcher) error {
 	resp, err := c.restyClient.NewRequest().
